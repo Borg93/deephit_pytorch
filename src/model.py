@@ -24,14 +24,14 @@ class DeepHit(nn.Module, PyTorchModelHubMixin):
     def __init__(
         self,
         input_dim=12,
-        input_dim_head=32,
-        hidden_dim_body=64,
+        input_dim_head=12,
+        hidden_dim_body=32,
         hidden_dim_head=32,
         output_dim=10,
         discrete_time=10,
         nr_event=2,
         dropout=0.2,
-        residual=False,
+        residual=True,
     ):
         super().__init__()
         self.output_time = discrete_time
@@ -76,7 +76,4 @@ if __name__ == "__main__":
     from torchview import draw_graph
 
     model = DeepHit()
-    batch_size = 256
-    # device='meta' -> no memory is consumed for visualization
-    model_graph = draw_graph(model, input_size=(batch_size, 12), device="meta")
-    model_graph.visual_graph.render(format="svg")
+    print(model)
