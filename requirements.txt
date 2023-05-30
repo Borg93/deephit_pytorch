@@ -1,0 +1,5 @@
+datasets
+huggingface_hub
+torch
+matplotlib
+numpy
