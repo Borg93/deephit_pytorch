@@ -50,7 +50,7 @@ def train_one_epoch(epoch_number, model, training_loader, optimizer, total_fn, d
     return sum(train_loss) / len(train_loss)
 
 
-def test_model(model, total_fn, validation_loader, device):
+def val_on_epoch(model, total_fn, validation_loader, device):
     model.eval()
     val_loss = []
     for batch_idx, vdata in enumerate(validation_loader):
@@ -68,12 +68,12 @@ def checkpoint(model, filename):
     torch.save(model.state_dict(), filename)
 
 
-def train(model, epochs, optimizer, total_fn, training_loader, validation_loader, device):
+def train(model, epochs, optimizer, total_fn, training_loader, validation_loader, device, early_stopping_tol, early_stopping_min_delta):
     epoch_number = 0
 
-    early_stopping = EarlyStopping(tolerance=2, min_delta=0.001)
+    early_stopping = EarlyStopping(tolerance=early_stopping_tol, min_delta=early_stopping_min_delta)
 
-    first_eval_loss = test_model(model, total_fn, validation_loader, device)
+    first_eval_loss = val_on_epoch(model, total_fn, validation_loader, device)
     print("initial_loss: ", first_eval_loss)
 
     log_train = []
@@ -83,7 +83,7 @@ def train(model, epochs, optimizer, total_fn, training_loader, validation_loader
         epoch_train_loss = train_one_epoch(epoch_number, model, training_loader, optimizer, total_fn, device)
         log_train.append((epoch_number, epoch_train_loss))
 
-        epoch_validate_loss = test_model(model, total_fn, validation_loader, device)
+        epoch_validate_loss = val_on_epoch(model, total_fn, validation_loader, device)
         log_val.append((epoch_number, epoch_validate_loss))
 
         # Print epoch losses
@@ -112,6 +112,7 @@ def plot_log(log_train, log_val):
 
     plt.plot(epoch_train, loss_train, label="Training Loss")
     plt.plot(epoch_val, loss_val, label="Validation Loss")
+    plt.legend()
 
     # Add in a title and axes labels
     plt.title("Training and Validation Loss")
@@ -132,15 +133,25 @@ if __name__ == "__main__":
     training_data = CompetingRiskDataset(dataset_transformed_train)
     validation_data = CompetingRiskDataset(dataset_transformed_val)
 
-    training_loader = DataLoader(training_data, batch_size=256, shuffle=True)
-    validation_loader = DataLoader(validation_data, batch_size=256, shuffle=True)
-
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    epochs = 200
     model = DeepHit().to(device)
-    optimizer = Adam(model.parameters(), lr=0.001)
     total_fn = total_loss
 
-    log_train, log_val = train(model, epochs, optimizer, total_fn, training_loader, validation_loader, device)
+    # hyperparameters
+    optimizer = Adam(model.parameters(), lr=0.001)
+    epochs = 200
+    early_stopping_tol = 2
+    early_stopping_min_delta = 0.01
+    sigma = 0.1
+    alpha = 0.3
+    batch_train_size = 256
+    batch_val_size = 256
+
+    training_loader = DataLoader(training_data, batch_size=batch_train_size, shuffle=True)
+    validation_loader = DataLoader(validation_data, batch_size=batch_val_size, shuffle=True)
+
+    log_train, log_val = train(
+        model, epochs, optimizer, total_fn, training_loader, validation_loader, device, early_stopping_tol, early_stopping_min_delta
+    )
 
     plot_log(log_train, log_val)

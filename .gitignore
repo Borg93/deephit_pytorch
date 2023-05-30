@@ -1,1 +1,3 @@
 venv/
+src/*.pth
+src/epoch-73.pth

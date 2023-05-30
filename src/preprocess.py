@@ -15,7 +15,7 @@ def equidistant_discretize_time_array(dataset, num_quantiles):
 
     new_time_array = np.copy(time_array)
     for i, category in enumerate(discretized_array):
-        new_time_array[i] = quantiles[int(category)]
+        new_time_array[i] = category  # quantiles[int(category)]
 
     return {"quantile": new_time_array}
 
@@ -73,13 +73,13 @@ def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
     dataset_val = dataset_competing_risk["validation"]  # .select(range(2000)
 
     dataset_transformed_train = dataset_train.map(
-        equidistant_discretize_time_array,
+        discretize_time_array,
         batched=True,
         fn_kwargs={"num_quantiles": 10},
         batch_size=len(dataset_train),
     )
     dataset_transformed_val = dataset_val.map(
-        equidistant_discretize_time_array,
+        discretize_time_array,
         batched=True,
         fn_kwargs={"num_quantiles": 10},
         batch_size=len(dataset_val),
@@ -91,5 +91,8 @@ def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
 if __name__ == "__main__":
     dataset_transformed_train, dataset_transformed_val = preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk")
 
-    unique, counts = np.unique(dataset_transformed_train["quantile"], return_counts=True)
-    print(unique, counts)
+    unique_train, counts_train = np.unique(dataset_transformed_train["quantile"], return_counts=True)
+    unique_val, counts_val = np.unique(dataset_transformed_val["quantile"], return_counts=True)
+
+    print(unique_train, counts_train)
+    print(unique_val, counts_val)
