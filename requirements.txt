@@ -3,3 +3,7 @@ huggingface_hub
 torch
 matplotlib
 numpy
+
+#visualize model
+graphviz
+torchview
