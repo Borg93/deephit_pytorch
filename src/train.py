@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 from torch.optim import Adam
+from tqdm.auto import tqdm
 
 
 class EarlyStopping:
@@ -17,7 +18,7 @@ class EarlyStopping:
                 self.early_stop = True
 
 
-def train_one_epoch(epoch_number, model, training_loader, optimizer, total_fn, device):
+def train_one_epoch(epoch_number, model, training_loader, optimizer, total_fn, alpha, sigma, device):
     train_loss = []
     model.train(True)
 
@@ -30,7 +31,7 @@ def train_one_epoch(epoch_number, model, training_loader, optimizer, total_fn, d
         # Make predictions for this batch
         outputs = model(inputs)
 
-        loss = total_fn(outputs, labels)
+        loss = total_fn(outputs, labels, alpha, sigma)
 
         optimizer.zero_grad()
 
@@ -50,7 +51,7 @@ def train_one_epoch(epoch_number, model, training_loader, optimizer, total_fn, d
     return sum(train_loss) / len(train_loss)
 
 
-def val_on_epoch(model, total_fn, validation_loader, device):
+def val_on_epoch(model, total_fn, validation_loader, alpha, sigma, device):
     model.eval()
     val_loss = []
     for batch_idx, vdata in enumerate(validation_loader):
@@ -58,7 +59,7 @@ def val_on_epoch(model, total_fn, validation_loader, device):
             vinputs = vdata[0].to(device)
             vlabels = vdata[1].to(device)
             voutputs = model(vinputs)
-            vloss = total_fn(voutputs, vlabels)
+            vloss = total_fn(voutputs, vlabels, alpha, sigma)
             val_loss.append(vloss.item())
     avg_val_loss = sum(val_loss) / len(val_loss)
     return avg_val_loss
@@ -68,22 +69,37 @@ def checkpoint(model, filename):
     torch.save(model.state_dict(), filename)
 
 
-def train(model, epochs, optimizer, total_fn, training_loader, validation_loader, device, early_stopping_tol, early_stopping_min_delta):
+def train(
+    model,
+    epochs,
+    optimizer,
+    total_fn,
+    training_loader,
+    validation_loader,
+    device,
+    early_stopping_tol,
+    early_stopping_min_delta,
+    alpha,
+    sigma,
+    push_to_hub,
+):
     epoch_number = 0
 
     early_stopping = EarlyStopping(tolerance=early_stopping_tol, min_delta=early_stopping_min_delta)
 
-    first_eval_loss = val_on_epoch(model, total_fn, validation_loader, device)
+    first_eval_loss = val_on_epoch(model, total_fn, validation_loader, alpha, sigma, device)
     print("initial_loss: ", first_eval_loss)
 
     log_train = []
     log_val = []
 
-    for epoch in range(epochs):
-        epoch_train_loss = train_one_epoch(epoch_number, model, training_loader, optimizer, total_fn, device)
+    for epoch in tqdm(range(epochs), desc=f"{epoch_number}"):
+        epoch_train_loss = train_one_epoch(
+            epoch_number, model, training_loader, optimizer, total_fn, alpha, sigma, device
+        )
         log_train.append((epoch_number, epoch_train_loss))
 
-        epoch_validate_loss = val_on_epoch(model, total_fn, validation_loader, device)
+        epoch_validate_loss = val_on_epoch(model, total_fn, validation_loader, alpha, sigma, device)
         log_val.append((epoch_number, epoch_validate_loss))
 
         # Print epoch losses
@@ -99,7 +115,10 @@ def train(model, epochs, optimizer, total_fn, training_loader, validation_loader
 
         epoch_number += 1
 
-    checkpoint(model, f"epoch-{epoch_number}.pth")
+    if push_to_hub:
+        model.push_to_hub(repo_id="Gabriel/DeepHit", commit_message=f"Training Complete Epoch {epoch_number}")
+    else:
+        checkpoint(model, f"epoch-{epoch_number}.pth")
 
     return log_train, log_val
 
@@ -139,19 +158,33 @@ if __name__ == "__main__":
 
     # hyperparameters
     optimizer = Adam(model.parameters(), lr=0.001)
+    # scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+
     epochs = 200
     early_stopping_tol = 2
     early_stopping_min_delta = 0.01
-    sigma = 0.1
     alpha = 0.3
+    sigma = 0.1
     batch_train_size = 256
     batch_val_size = 256
+    push_to_hub = True
 
     training_loader = DataLoader(training_data, batch_size=batch_train_size, shuffle=True)
     validation_loader = DataLoader(validation_data, batch_size=batch_val_size, shuffle=True)
 
     log_train, log_val = train(
-        model, epochs, optimizer, total_fn, training_loader, validation_loader, device, early_stopping_tol, early_stopping_min_delta
+        model,
+        epochs,
+        optimizer,
+        total_fn,
+        training_loader,
+        validation_loader,
+        device,
+        early_stopping_tol,
+        early_stopping_min_delta,
+        alpha,
+        sigma,
+        push_to_hub,
     )
 
     plot_log(log_train, log_val)

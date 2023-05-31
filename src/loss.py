@@ -115,18 +115,19 @@ def new_pair_rank_mat(idx_durations, events, dtype=torch.float32):
     return mat
 
 
-def total_loss(outputs, labels, alpha=0.3):
+def total_loss(outputs, labels, alpha=0.3, sigma=0.1):
     l1 = negative_log_likelihood(outputs, labels)
-    l2 = ranking_loss(outputs, labels)
+    l2 = ranking_loss(outputs, labels, sigma)
     total_loss = alpha * l1 + (1 - alpha) * l2
     return total_loss
 
 
 if __name__ == "__main__":
+    from torch.optim import Adam
+
     from dataloader import CompetingRiskDataset, DataLoader
     from model import DeepHit
     from preprocess import preprocess_pipe
-    from torch.optim import Adam
 
     # dataset_transformed_train, dataset_transformed_val = preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk")
     # training_data = CompetingRiskDataset(dataset_transformed_train)
