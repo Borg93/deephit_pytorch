@@ -14,6 +14,7 @@ def model_predict(model, input, device, predict_type):
     else:
         return outputs
 
+    # low brier score good , and less than 0.25 is "good"
 def brier_score(predicted_pmf, label):
   e, t = label.squeeze().split(1, dim=-1)
   e,t = e.squeeze().numpy(), t.squeeze().numpy()
