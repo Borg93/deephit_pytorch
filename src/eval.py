@@ -1,7 +1,5 @@
 import torch
-
-# import skurv.
-
+from sksurv.metrics import integrated_brier_score
 
 def model_predict(model, input, device, predict_type):
     model.eval()
