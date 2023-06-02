@@ -115,6 +115,11 @@ def train(
 
         epoch_number += 1
 
+        if epoch_number > 40:
+            print("We are at epoch:", epoch_number)
+            checkpoint(model, f"epoch-{epoch_number}.pth")
+            break
+
     if push_to_hub:
         model.push_to_hub(repo_id="Gabriel/DeepHit", commit_message=f"Training Complete Epoch {epoch_number}")
     else:
@@ -147,7 +152,9 @@ if __name__ == "__main__":
     from model import DeepHit
     from preprocess import preprocess_pipe
 
-    dataset_transformed_train, dataset_transformed_val = preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk")
+    dataset_transformed_train, dataset_transformed_val, _ = preprocess_pipe(
+        dataset_hf="Gabriel/synthetic_competing_risk"
+    )
 
     training_data = CompetingRiskDataset(dataset_transformed_train)
     validation_data = CompetingRiskDataset(dataset_transformed_val)
@@ -162,12 +169,12 @@ if __name__ == "__main__":
 
     epochs = 200
     early_stopping_tol = 2
-    early_stopping_min_delta = 0.01
+    early_stopping_min_delta = 0.005
     alpha = 0.3
     sigma = 0.1
     batch_train_size = 256
     batch_val_size = 256
-    push_to_hub = True
+    push_to_hub = False
 
     training_loader = DataLoader(training_data, batch_size=batch_train_size, shuffle=True)
     validation_loader = DataLoader(validation_data, batch_size=batch_val_size, shuffle=True)

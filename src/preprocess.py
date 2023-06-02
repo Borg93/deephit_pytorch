@@ -65,7 +65,12 @@ def visualize_quantile(dataset, eq_quantile, quantile):
 
 def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
     dataset_competing_risk = load_dataset(
-        "parquet", data_files={"train": ".cache/train.parquet", "validation": ".cache/val.parquet", "test": ".cache/test.parquet"}
+        "parquet",
+        data_files={
+            "train": "/home/gabriel/Desktop/deephit/src/.cache/train.parquet",
+            "validation": "/home/gabriel/Desktop/deephit/src/.cache/train.parquet",
+            "test": "/home/gabriel/Desktop/deephit/src/.cache/train.parquet",
+        },
     )
 
     dataset_train = dataset_competing_risk["train"]  # .select(range(2000))
@@ -73,23 +78,32 @@ def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
     dataset_val = dataset_competing_risk["validation"]  # .select(range(2000)
 
     dataset_transformed_train = dataset_train.map(
-        discretize_time_array,
+        equidistant_discretize_time_array,
         batched=True,
         fn_kwargs={"num_quantiles": 10},
         batch_size=len(dataset_train),
     )
     dataset_transformed_val = dataset_val.map(
-        discretize_time_array,
+        equidistant_discretize_time_array,
         batched=True,
         fn_kwargs={"num_quantiles": 10},
         batch_size=len(dataset_val),
     )
 
-    return dataset_transformed_train, dataset_transformed_val
+    dataset_transformed_test = dataset_test.map(
+        equidistant_discretize_time_array,
+        batched=True,
+        fn_kwargs={"num_quantiles": 10},
+        batch_size=len(dataset_test),
+    )
+
+    return dataset_transformed_train, dataset_transformed_val, dataset_transformed_test
 
 
 if __name__ == "__main__":
-    dataset_transformed_train, dataset_transformed_val = preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk")
+    dataset_transformed_train, dataset_transformed_val, dataset_transformed_test = preprocess_pipe(
+        dataset_hf="Gabriel/synthetic_competing_risk"
+    )
 
     unique_train, counts_train = np.unique(dataset_transformed_train["quantile"], return_counts=True)
     unique_val, counts_val = np.unique(dataset_transformed_val["quantile"], return_counts=True)
