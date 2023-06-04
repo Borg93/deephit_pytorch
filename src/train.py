@@ -194,3 +194,18 @@ if __name__ == "__main__":
     )
 
     plot_log(log_train, log_val)
+    
+    
+#     model = torch.nn.Linear(2, 1)
+#     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+#     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+#     lrs = []
+
+
+#     for i in range(50):
+#         optimizer.step()
+#         lrs.append(optimizer.param_groups[0]["lr"])
+#     #     print("Factor = ",0.1," , Learning Rate = ",optimizer.param_groups[0]["lr"])
+#         scheduler.step()
+
+#     plt.plot(lrs)
