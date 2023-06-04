@@ -23,9 +23,9 @@ def brier_score(predicted_pmf, label):
     e, t = e.squeeze().numpy(), t.squeeze().numpy()
 
     predicted_cifs = predicted_pmf.cumsum(dim=-1)
-    predicted_surv = 1 - predicted_cifs
-    predicted_surv_e1 = predicted_surv[:, 0, :].cpu().squeeze().numpy()
-    predicted_surv_e2 = predicted_surv[:, 1, :].cpu().squeeze().numpy()
+    predicted_surv = 1 - predicted_cifs.sum(1)
+    predicted_surv_combined = predicted_surv.cpu().squeeze().numpy()
+    #predicted_surv_e2 = predicted_surv[:, 1, :].cpu().squeeze().numpy()
 
     y = np.array([(True, t) if e == 0 else (False, t) for (e, t) in zip(e, t)], dtype=[("cens", "?"), ("time", "<f8")])
 
@@ -35,8 +35,8 @@ def brier_score(predicted_pmf, label):
     print(times_t)
 
     score = {
-        "e1": integrated_brier_score(y, y, predicted_surv_e1, times_t),
-        "e2": integrated_brier_score(y, y, predicted_surv_e2, times_t),
+        "brier_score": integrated_brier_score(y, y, predicted_surv_combined, times_t),
+   #     "e2": integrated_brier_score(y, y, predicted_surv_e2, times_t),
     }
 
     return score
