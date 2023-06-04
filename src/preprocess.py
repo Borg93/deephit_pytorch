@@ -28,12 +28,15 @@ def discretize_time_array(dataset, num_quantiles):
     new_value_quantiles = np.percentile(sorted_array, quantile_boundaries)
     new_value_quantiles = new_value_quantiles +1
     new_value_quantiles[0] = new_value_quantiles[0]-1
+    new_value_quantiles[-1] = new_value_quantiles[-1] -1
+
+    # print(new_value_quantiles)
     
-    discretized_array = np.digitize(time_array, new_value_quantiles, right=True)
+    discretized_array = np.digitize(time_array, new_value_quantiles)
     
     new_time_array = np.copy(time_array)
     for i, category in enumerate(discretized_array):
-        new_time_array[i] = category #new_value_quantiles[int(category - 1)]
+        new_time_array[i] = category-1 #new_value_quantiles[int(category - 1)]
     return {"quantile": new_time_array}
 
 
