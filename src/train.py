@@ -117,11 +117,6 @@ def train(
         epoch_number += 1
         scheduler.step()
 
-        if epoch_number > 40:
-            print("We are at epoch:", epoch_number)
-            checkpoint(model, f"epoch-{epoch_number}.pth")
-            break
-
     if push_to_hub:
         model.push_to_hub(repo_id="Gabriel/DeepHit", commit_message=f"Training Complete Epoch {epoch_number}")
     else:
@@ -170,7 +165,7 @@ if __name__ == "__main__":
     optimizer = Adam(model.parameters(), lr=0.01)
     scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
 
-    epochs = 200
+    epochs = 100
     early_stopping_tol = 2
     early_stopping_min_delta = 0.005
     alpha = 0.3
