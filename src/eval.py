@@ -32,11 +32,11 @@ def brier_score(predicted_pmf, label):
     time_step = max(t) / predicted_cifs.shape[2]
     times_t = np.arange(min(t), max(t), time_step, dtype="<f8")
 
-    print(times_t)
+    brier_score = integrated_brier_score(y, y, predicted_surv_combined, times_t)
 
     score = {
-        "brier_score": integrated_brier_score(y, y, predicted_surv_combined, times_t),
-   #     "e2": integrated_brier_score(y, y, predicted_surv_e2, times_t),
+        "Brier_Score": brier_score,
+        "Accuracy": 1-brier_score,
     }
 
     return score
