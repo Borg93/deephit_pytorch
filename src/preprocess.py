@@ -65,8 +65,12 @@ def visualize_quantile(dataset, eq_quantile, quantile):
     ## Show the plot
     plt.show()
 
+def turn_to_single_event(row):
+  if row["label"] == 2:
+    row["label"] = 1
+  return row
 
-def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
+def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk", competing_risks=True):
     dataset_competing_risk = load_dataset(
         "parquet",
         data_files={
@@ -79,6 +83,11 @@ def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
     dataset_train = dataset_competing_risk["train"]  # .select(range(2000))
     dataset_test = dataset_competing_risk["test"]  # .select(range(2000))
     dataset_val = dataset_competing_risk["validation"]  # .select(range(2000)
+
+    if not competing_risks:
+      dataset_train = dataset_train.map(turn_to_single_event)
+      dataset_test = dataset_test.map(turn_to_single_event)
+      dataset_val = dataset_val.map(turn_to_single_event)
 
     dataset_transformed_train = dataset_train.map(
         equidistant_discretize_time_array,
