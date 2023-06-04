@@ -161,14 +161,14 @@ if __name__ == "__main__":
     model = DeepHit().to(device)
     total_fn = total_loss
 
-    # hyperparameters
-    optimizer = Adam(model.parameters(), lr=0.01)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
+# hyperparameters
+    optimizer = Adam(model.parameters(), lr=0.04)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.98)
 
     epochs = 100
     early_stopping_tol = 2
     early_stopping_min_delta = 0.005
-    alpha = 0.3
+    alpha = 0.2
     sigma = 0.1
     batch_train_size = 256
     batch_val_size = 256
@@ -196,16 +196,24 @@ if __name__ == "__main__":
     plot_log(log_train, log_val)
     
     
-#     model = torch.nn.Linear(2, 1)
-#     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-#     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
-#     lrs = []
+# import torch
+# import matplotlib.pyplot as plt
+
+# model = torch.nn.Linear(2, 1)
+# optimizer = torch.optim.Adam(model.parameters(), lr=0.04)
+# scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer ,gamma=0.98)
+# # scheduler= torch.optim.lr_scheduler.StepLR (optimizer , 30 , gamma=0.01)
+
+# lrs = []
 
 
-#     for i in range(50):
-#         optimizer.step()
-#         lrs.append(optimizer.param_groups[0]["lr"])
-#     #     print("Factor = ",0.1," , Learning Rate = ",optimizer.param_groups[0]["lr"])
-#         scheduler.step()
+# for i in range(80):
+#     optimizer.step()
+#     lrs.append(optimizer.param_groups[0]["lr"])
+# #     print("Factor = ",0.1," , Learning Rate = ",optimizer.param_groups[0]["lr"])
+#     scheduler.step()
 
-#     plt.plot(lrs)
+# plt.title("Decaying learning rate (LR)")
+# plt.xlabel("Epochs")
+# plt.ylabel("LR")
+# plt.plot(lrs)
