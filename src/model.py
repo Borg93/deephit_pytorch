@@ -45,20 +45,6 @@ class DeepHit(nn.Module, PyTorchModelHubMixin):
     def forward(self, x):
         input = self.body(x)
 
-        if self.residual:
-            # print("Shape input:",input.shape)
-            input_head = self.relu(input+ x)
-            output1 = self.head1(input_head)  # Residual connection from body to head1
-            # print("Shape output1:",output1.shape)
-            output2 = self.head2(input_head)  # Residual connection from body to head2
-            # print("Shape output2:",output2.shape)
-
-        else:
-            input_head = self.relu(input)
-            output1 = self.head1(input_head)
-            output2 = self.head2(input_head)    def forward(self, x):
-        input = self.body(x)
-
         input_head = self.relu(input)
 
         if self.residual:
