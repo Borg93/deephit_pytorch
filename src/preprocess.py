@@ -23,14 +23,17 @@ def equidistant_discretize_time_array(dataset, num_quantiles):
 def discretize_time_array(dataset, num_quantiles):
     time_array = dataset["time"]
     sorted_array = np.sort(time_array)
-    quantile_boundaries = np.linspace(0, 100, num_quantiles + 1)
+    quantile_boundaries = np.linspace(0, 100, num_quantiles)
+    #print(quantile_boundaries)
     new_value_quantiles = np.percentile(sorted_array, quantile_boundaries)
-    discretized_array = np.digitize(time_array, new_value_quantiles)
-
+    new_value_quantiles = new_value_quantiles +1
+    new_value_quantiles[0] = new_value_quantiles[0]-1
+    
+    discretized_array = np.digitize(time_array, new_value_quantiles, right=True)
+    
     new_time_array = np.copy(time_array)
     for i, category in enumerate(discretized_array):
-        new_time_array[i] = new_value_quantiles[int(category - 1)]
-
+        new_time_array[i] = category #new_value_quantiles[int(category - 1)]
     return {"quantile": new_time_array}
 
 
