@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import torch
-from torch.optim import Adam
+from torch.optim import Adam, lr_scheduler
 from tqdm.auto import tqdm
 
 
@@ -82,6 +82,7 @@ def train(
     alpha,
     sigma,
     push_to_hub,
+    scheduler
 ):
     epoch_number = 0
 
@@ -114,6 +115,7 @@ def train(
             break
 
         epoch_number += 1
+        scheduler.step()
 
         if epoch_number > 40:
             print("We are at epoch:", epoch_number)
@@ -143,7 +145,8 @@ def plot_log(log_train, log_val):
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
 
-    plt.show()
+    #plt.show()
+    plt.savefig(f"./output_{epoch_train[-1]}.png")
 
 
 if __name__ == "__main__":
@@ -164,8 +167,8 @@ if __name__ == "__main__":
     total_fn = total_loss
 
     # hyperparameters
-    optimizer = Adam(model.parameters(), lr=0.001)
-    # scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    optimizer = Adam(model.parameters(), lr=0.01)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.2)
 
     epochs = 200
     early_stopping_tol = 2
@@ -192,6 +195,7 @@ if __name__ == "__main__":
         alpha,
         sigma,
         push_to_hub,
+        scheduler
     )
 
     plot_log(log_train, log_val)
