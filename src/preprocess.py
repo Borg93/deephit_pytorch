@@ -70,9 +70,9 @@ def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
     dataset_competing_risk = load_dataset(
         "parquet",
         data_files={
-            "train": "/home/gabriel/Desktop/deephit/src/.cache/train.parquet",
-            "validation": "/home/gabriel/Desktop/deephit/src/.cache/train.parquet",
-            "test": "/home/gabriel/Desktop/deephit/src/.cache/train.parquet",
+            "train": ".cache/train.parquet",
+            "validation": ".cache/train.parquet",
+            "test": ".cache/train.parquet",
         },
     )
 
