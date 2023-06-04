@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
     # hyperparameters
     optimizer = Adam(model.parameters(), lr=0.01)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.2)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
 
     epochs = 200
     early_stopping_tol = 2
