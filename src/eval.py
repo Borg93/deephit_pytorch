@@ -52,7 +52,7 @@ if __name__ == "__main__":
     _, _, dataset_transformed_test = preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk")
 
     test_data = CompetingRiskDataset(dataset_transformed_test)
-    test_loader = DataLoader(test_data, batch_size=256, shuffle=True)
+    test_loader = DataLoader(test_data, batch_size=len(dataset_transformed_test), shuffle=True)
 
     data = iter(test_loader)
 
