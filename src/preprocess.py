@@ -71,8 +71,8 @@ def preprocess_pipe(dataset_hf="Gabriel/synthetic_competing_risk"):
         "parquet",
         data_files={
             "train": ".cache/train.parquet",
-            "validation": ".cache/train.parquet",
-            "test": ".cache/train.parquet",
+            "validation": ".cache/val.parquet",
+            "test": ".cache/test.parquet",
         },
     )
 
