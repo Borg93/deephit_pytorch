@@ -4,7 +4,7 @@ torch
 matplotlib
 numpy
 tqdm
-# scikit-survival
+scikit-survival
 
 # #visualize model
 # graphviz
